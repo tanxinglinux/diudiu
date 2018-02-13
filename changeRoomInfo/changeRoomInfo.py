@@ -46,6 +46,7 @@ def exls2sql():
     result_dict={}
     for i in range(2,rowscount):    #循环顺序可以优化，目前影响不大，Mark，暂不改。
         servername = sheet1.cell_value(i,0)
+        version = str(sheet1.cell_value(i,1))
         tmp_list = []
         for j in range(2,colscount):
             if sheet1.cell_value(1,j):
@@ -57,7 +58,7 @@ def exls2sql():
                     pass
             else:pass
         tmp = BEGIN + ','.join(tmp_list) + END
-        result_dict[servername] = tmp
+        result_dict[servername+version] = tmp
     return result_dict
 
 '''查询函数,根据serverName和version查询对应的serverID'''
@@ -89,9 +90,9 @@ def selectSQL():
         if serverid:    #将servername和以此查询到的所有serverID以列表形式存入字典
             for x in serverid:
                 id_list.append(x[0])
-                id_dict[servername]= id_list
+                id_dict[servername + version]= id_list
         else:
-            messg = "未查询到 %s 请手动添加！" %(servername_code)
+            messg = "未查询到 %s,%s 请手动添加！" %(servername_code,version)
             logger.warn(messg)
     logger.debug("查询完成，断开数据库连接！")
     return id_dict
@@ -142,7 +143,7 @@ if __name__ == '__main__':
     '''读取房间配置表'''
     start = time.time()
     try:
-        workbook = xlrd.open_workbook(r'room.xlsx')
+        workbook = xlrd.open_workbook(r'./room.xlsx')
     except IOError as e:
         # print "房间配置表是否存在？名称是否正确？"
         logger.error(e)
